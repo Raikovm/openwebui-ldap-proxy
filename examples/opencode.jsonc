@@ -1,0 +1,26 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "openwebui-proxy": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OpenWebUI Proxy",
+      "options": {
+        "baseURL": "http://127.0.0.1:3000/v1",
+        "apiKey": "{env:OPENWEBUI_PROXY_BEARER}",
+        "timeout": 600000,
+        "chunkTimeout": 30000
+      },
+      "models": {
+        "your-model-id": {
+          "name": "OpenWebUI Model",
+          "limit": {
+            "context": 128000,
+            "output": 8192
+          }
+        }
+      }
+    }
+  },
+  "model": "openwebui-proxy/your-model-id",
+  "small_model": "openwebui-proxy/your-model-id"
+}
