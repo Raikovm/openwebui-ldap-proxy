@@ -75,6 +75,9 @@ export class OpenWebUIAuthClient {
       headers: {
         "content-type": "application/json",
         accept: "application/json",
+        ...(credentials.authorizationHeader
+          ? { authorization: credentials.authorizationHeader }
+          : {}),
       },
       body: JSON.stringify(payload),
     });

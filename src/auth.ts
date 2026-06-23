@@ -1,9 +1,11 @@
+import { config } from "./config";
 import { ProxyError } from "./errors";
 import { debugLog, redactSecret } from "./logger";
 
 export type BasicCredentials = {
   username: string;
   password: string;
+  authorizationHeader?: string;
 };
 
 function parseUsernamePassword(value: string): BasicCredentials {
@@ -65,7 +67,8 @@ function parseBearerToken(token: string): BasicCredentials {
 }
 
 export async function requireBasicAuth(request: Request): Promise<BasicCredentials> {
-  const header = request.headers.get("authorization")?.trim();
+  const requestHeader = request.headers.get("authorization")?.trim();
+  const header = config.proxyAuthorization || requestHeader;
   if (!header) {
     throw new ProxyError("Authorization header is required", {
       status: 401,
@@ -74,12 +77,21 @@ export async function requireBasicAuth(request: Request): Promise<BasicCredentia
     });
   }
 
+  if (config.proxyAuthorization) {
+    debugLog("using authorization from environment", {
+      token_preview: redactSecret(header),
+    });
+  }
+
   if (header.startsWith("Basic ")) {
     debugLog("parsed authorization header", {
       scheme: "Basic",
       token_preview: redactSecret(header.slice(6)),
     });
-    return parseUsernamePassword(decodeBase64Token(header.slice(6)));
+    return {
+      ...parseUsernamePassword(decodeBase64Token(header.slice(6))),
+      authorizationHeader: header,
+    };
   }
 
   if (header.startsWith("Bearer ")) {
@@ -88,7 +100,10 @@ export async function requireBasicAuth(request: Request): Promise<BasicCredentia
       token_preview: redactSecret(header.slice(7)),
       bearer_mode: header.includes(":") ? "raw_or_prefixed" : "encoded_or_api_key",
     });
-    return parseBearerToken(header.slice(7));
+    return {
+      ...parseBearerToken(header.slice(7)),
+      authorizationHeader: header,
+    };
   }
 
   throw new ProxyError("Expected Basic auth or Bearer credentials", {

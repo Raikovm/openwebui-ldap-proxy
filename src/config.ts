@@ -73,7 +73,8 @@ const loginPath = normalizePath(Bun.env.OPENWEBUI_LOGIN_PATH?.trim() || "/api/v1
 export const config = {
   port: readNumber("PORT", 3000),
   logLevel: Bun.env.LOG_LEVEL?.trim() || "info",
-  requestTimeoutMs: readNumber("REQUEST_TIMEOUT_MS", 60_000),
+  proxyAuthorization: Bun.env.OPENWEBUI_PROXY_AUTHORIZATION?.trim() || null,
+  requestTimeoutMs: readNumber("REQUEST_TIMEOUT_MS", 30 * 60 * 1000),
   sessionTtlSeconds: readNumber("SESSION_TTL_SECONDS", 3600),
   openWebUi: {
     baseUrl: readRequired("OPENWEBUI_BASE_URL").replace(/\/$/, ""),

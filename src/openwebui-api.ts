@@ -28,6 +28,7 @@ export class OpenWebUIApiClient {
       username: options.credentials.username,
       has_body: Boolean(options.body),
       accept: options.accept || "application/json",
+      has_authorization: Boolean(options.credentials.authorizationHeader),
     });
     let response = await this.doRequest(options, cookieHeader);
 
@@ -74,6 +75,9 @@ export class OpenWebUIApiClient {
         method: options.method || "GET",
         headers: {
           accept: options.accept || "application/json",
+          ...(options.credentials.authorizationHeader
+            ? { authorization: options.credentials.authorizationHeader }
+            : {}),
           ...(options.body ? { "content-type": options.contentType || "application/json" } : {}),
           cookie: cookieHeader,
         },
